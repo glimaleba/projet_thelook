@@ -4,7 +4,7 @@ SELECT
       o.created_at AS DATE_COMMANDE,
       oi.status AS STATUT_ARTICLE,
       oi.sale_price AS PRIX_VENTE,
-      oi.cost AS COUT,
+      p.cost AS COUT,
       p.brand AS MARQUE,
       p.category AS CATEGORIE,
       p.department AS DEPARTEMENT,
@@ -17,15 +17,15 @@ SELECT
       u.state AS ETAT_PROVINCE_CLIENT,
       u.city AS VILLE_CLIENT
 
-FROM users AS u
+FROM bigquery-public-data.thelook_ecommerce.users AS u
 
-JOIN orders AS o
+JOIN bigquery-public-data.thelook_ecommerce.orders AS o
     ON u.id = o.user_id
 
-JOIN order_items AS oi
+JOIN bigquery-public-data.thelook_ecommerce.order_items AS oi
     ON o.order_id = oi.order_id
 
-JOIN products AS p
+JOIN bigquery-public-data.thelook_ecommerce.products AS p
     ON p.id = oi.product_id
 
 WHERE 
@@ -41,37 +41,37 @@ ORDER BY
 --Calculs de CA,Marge,Panier moyen, sur les lignes Complete
 SELECT
       SUM(oi.sale_price) AS CA,
-      SUM(oi.sale_price-oi.cost) AS MARGE,
+      SUM(oi.sale_price-p.cost) AS MARGE,
       ROUND(SUM(oi.sale_price)/COUNT(DISTINCT o.order_id),2) AS PANIER_MOYEN
 
-FROM users u
-JOIN orders o
+FROM bigquery-public-data.thelook_ecommerce.users u
+JOIN bigquery-public-data.thelook_ecommerce.orders o
  ON u.id = o.user_id
-JOIN order_items oi
+JOIN bigquery-public-data.thelook_ecommerce.order_items oi
  ON o.order_id = oi.order_id
-JOIN products AS p
-    ON p.id = oi.product_id 
+JOIN bigquery-public-data.thelook_ecommerce.products AS p
+ ON p.id = oi.product_id 
 
 WHERE 
       u.country = 'France'
   AND p.department = 'Women'
   AND DATE(oi.created_at) BETWEEN '2023-01-01' AND '2024-12-31'
-  AND oi.item_status="Complete"
+  AND oi.status="Complete"
 
 
 --Calcul du Taux de retour sur les lignes Returned
-SELECT ROUND(COUNTIF(oi.item_status="Returned")*100/COUNT(*),2) AS TAUX_RETOUR
+SELECT ROUND(COUNTIF(oi.status="Returned")*100/COUNT(*),2) AS TAUX_RETOUR
 
-FROM users u
-JOIN orders o
+FROM bigquery-public-data.thelook_ecommerce.users u
+JOIN bigquery-public-data.thelook_ecommerce.orders o
  ON u.id = o.user_id
-JOIN order_items oi
+JOIN bigquery-public-data.thelook_ecommerce.order_items oi
  ON o.order_id = oi.order_id
-JOIN products AS p
-    ON p.id = oi.product_id   
+JOIN bigquery-public-data.thelook_ecommerce.products AS p
+ ON p.id = oi.product_id   
 
 WHERE 
       u.country = 'France'
   AND p.department = 'Women'
   AND DATE(oi.created_at) BETWEEN '2023-01-01' AND '2024-12-31'
-  AND oi.item_status IN ("Complete","Returned")
+  AND oi.status IN ("Complete","Returned")
