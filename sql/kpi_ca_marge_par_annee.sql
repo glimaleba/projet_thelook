@@ -1,23 +1,49 @@
 --kpi 1: Chiffre d'affaires annuel
-SELECT 
-    SUM(sale_price) AS `CHIFFRE D'AFFAIRE`,
-    EXTRACT(YEAR FROM delivered_at) AS ANNEE
-FROM `lookecommerce-502712.thelook_fr_women_2023_2024.sales`
-WHERE department = "Women"
-  AND country = "France"
-  AND item_status = "Complete"
-  AND EXTRACT(YEAR FROM delivered_at) IN (2023, 2024)
-GROUP BY ANNEE
+
+SELECT EXTRACT(YEAR FROM oi.delivered_at) AS ANNEE,
+       SUM(oi.sale_price) AS CA --Chiffre d'affaires
+-- Pour les tables suivantes, ordre logique: users,orders,order_items,products
+FROM `bigquery-public-data.thelook_ecommerce.users` AS u
+JOIN `bigquery-public-data.thelook_ecommerce.orders` AS o
+    ON u.id = o.user_id
+JOIN `bigquery-public-data.thelook_ecommerce.order_items` AS oi
+    ON o.order_id = oi.order_id
+JOIN `bigquery-public-data.thelook_ecommerce.products` AS p
+    ON p.id = oi.product_id
+--Les lignes suivantes servent à respecter le périmètre
+WHERE  oi.delivered_at >= '2023-01-01'AND oi.delivered_at < '2025-01-01' 
+  AND p.department = "Women" --afin de respecter le périmètre
+  AND u.country = "France" --afin de respecter le périmètre
+  AND oi.status = "Complete" -- car ventes
+GROUP BY ANNEE -- ou EXTRACT(YEAR FROM oi.delivered_at); cette ligne permet de grouper par année 
 ORDER BY ANNEE;
+
+--Resultats: 
+--	2023	8349.5400056838989
+--	2024	10622.750042915344	
+
+
 --kpi 2: Marge brute
-SELECT 
-    EXTRACT(YEAR FROM delivered_at) AS ANNEE,
-    SUM(sale_price - cost) AS `MARGE BRUTE`
-FROM `lookecommerce-502712.thelook_fr_women_2023_2024.sales`
-WHERE department = "Women"
-  AND country = "France"
-  AND item_status = "Complete"
-  AND EXTRACT(YEAR FROM delivered_at) IN (2023, 2024)
-GROUP BY ANNEE
+
+SELECT EXTRACT(YEAR FROM oi.delivered_at) AS ANNEE,
+       SUM(oi.sale_price-p.cost) AS MARGE_BRUTE
+-- Pour les tables suivantes, ordre logique: users,orders,order_items,products
+FROM `bigquery-public-data.thelook_ecommerce.users` AS u
+JOIN `bigquery-public-data.thelook_ecommerce.orders` AS o
+    ON u.id = o.user_id
+JOIN `bigquery-public-data.thelook_ecommerce.order_items` AS oi
+    ON o.order_id = oi.order_id
+JOIN `bigquery-public-data.thelook_ecommerce.products` AS p
+    ON p.id = oi.product_id
+--Les lignes suivantes servent à respecter le périmètre
+WHERE  oi.delivered_at >= '2023-01-01'AND oi.delivered_at < '2025-01-01' 
+  AND p.department = "Women" --afin de respecter le périmètre
+  AND u.country = "France" --afin de respecter le périmètre
+  AND oi.status = "Complete" -- car ventes
+GROUP BY ANNEE -- ou EXTRACT(YEAR FROM oi.delivered_at); cette ligne permet de grouper par année 
 ORDER BY ANNEE;
+
+-- Résultats: 
+--	2023	4282.7899300807712
+--	2024	5569.5916364905543	
 
