@@ -38,3 +38,4 @@ ORDER BY
       o.order_id,
       oi.id;
 
+-- Ce qui nous donne un résultat de 1294 lignes ; qui est nettement inférieur au nombre de lignes du dataset fourni en .csv (1679 lignes). Ceci pourrait expliquer les différences de résultats entre le traitement python et le traitement direct BigQuery.
