@@ -141,4 +141,4 @@ Résultats obtenus en SQL (source de vérité BigQuery) :
 - Les KPI financiers reposent exclusivement sur les lignes `Complete`.
 - Le taux de retour repose sur `Returned / (Complete + Returned)`.
 - Le taux de ré-achat est calculé au niveau client, par année.
-- Tout écart entre les résultats Python (CSV) et SQL (BigQuery) doit être expliqué avant restitution finale.
+
